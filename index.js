@@ -59,6 +59,88 @@ const client = new SpamWatch.Client(
   "BfIfgL9JHEcMouxYYDrvkeA8lIQo5zwjjICiObGqn1fx_8hTKdDXGhGMftQgYwXJ"
 );
 
+
+
+const firebase = require('firebase/app');
+require('firebase/firestore');
+
+firebase.initializeApp({
+  apiKey: "AIzaSyD_wXpg2fm85WVi4EfLpd3VEi_Tr8fd3rk",
+  authDomain: "noge-cb2c3.firebaseapp.com",
+  projectId: "noge-cb2c3",
+  storageBucket: "noge-cb2c3.appspot.com",
+  messagingSenderId: "197756782660",
+  appId: "1:197756782660:web:f06b93916cde7b517b9411"
+});
+
+const db = firebase.firestore();
+
+
+bot.onText(/\/eliminar_usuario (.+)/, (msg, match) => {
+  const chatId = msg.chat.id;
+  const userIds = match[1];
+
+  bot.banChatMember(chatId, userIds).then(() => {
+    bot.sendMessage(chatId, 'El usuario ha sido eliminado del grupo.');
+    db.collection('users').doc(userIds).set({ banned: true });
+  }).catch((error) => {
+    bot.sendMessage(chatId, 'Ha ocurrido un error al eliminar al usuario.');
+    console.error(error);
+  });
+});
+
+
+bot.onText(/\/ban (.+)/, (msg, match) => {
+  const chatId = msg.chat.id;
+  var userId = msg.from.id;
+  const userIds = match[1];
+  bot.getChatMember(chatId, userId).then(function (data) {
+    if (data.status == "creator" || data.status == "administrator") {
+      bot.kickChatMember(chatId, userIds).then(() => {
+        bot.sendMessage(
+          chatId,
+          `🔪<i>El usuario</i> <i>ha sido eliminado del grupo, ¡sin posibilidad de ingresos!</i> \n\n🐬<b>ID:</b> (<code>${userIds}</code>)`,
+          { parse_mode: "HTML" }
+        );
+        db.collection('users').doc(userIds).set({ banned: true });
+      }).catch((error) => {
+        bot.sendMessage(chatId, 'Ha ocurrido un error al eliminar al usuario.');
+        console.error(error);
+      });
+    } else {
+      bot.sendMessage(
+        chatId,
+        "Solo el creador y administradores pueden usar este comando:("
+      );
+    }
+  });
+});
+//0.53.0
+bot.onText(/\/unban (.+)/, (msg, match) => {
+  const chatId = msg.chat.id;
+  var userIds = msg.from.id;
+  const userId = match[1];
+  bot.getChatMember(chatId, userIds).then(function (data) {
+    if (data.status == "creator" || data.status == "administrator") {
+      bot.unbanChatMember(chatId, userId).then(() => {
+        bot.sendMessage(
+          chatId,
+          `🔪<i>El usuario</i> <i>ha sido desbaneado del grupo, ¡Tiene una segunda oportunidad!</i>`,
+          { parse_mode: "HTML" }
+        );
+        db.collection('users').doc(userId).set({ banned: false }, { merge: true });
+      }).catch((error) => {
+        bot.sendMessage(chatId, 'Ha ocurrido un error al eliminar al usuario.');
+        console.error(error);
+      });
+    } else {
+      bot.sendMessage(
+        chatId,
+        "Solo el creador y administradores pueden usar este comando:("
+      );
+    }
+  });
+});
 /**************************************************COMANDO START**************************************************/
 var bannedPeople = getBanned();
 bot.onText(/^\/start/, (msg) => {
@@ -890,7 +972,7 @@ bot.onText(/^\/ban/, function (msg) {
   });
 });
 
-bot.onText(/\/rban (.+)/, (msg, match) => {
+/* bot.onText(/\/rban (.+)/, (msg, match) => {
   var chatId = msg.chat.id;
   var replyId = msg.reply_to_message.from.id;
   var replyName = msg.reply_to_message.from.first_name;
@@ -913,7 +995,8 @@ bot.onText(/\/rban (.+)/, (msg, match) => {
       );
     }
   });
-});
+}); */
+
 bot.onText(/^\/tban (.+)/, function (msg, match) {
   var chatId = msg.chat.id;
   var userId = msg.from.id;
@@ -949,6 +1032,13 @@ bot.onText(/^\/tban (.+)/, function (msg, match) {
       );
     }
   });
+});
+
+
+
+
+bot.on('polling_error', (error) => {
+  console.error(error);
 });
 
 bot.onText(/^\/unban/, function (msg) {
@@ -3330,7 +3420,7 @@ bot.on("callback_query", function onCallbackQuery(callbackQuery) {
   }
   if (action === "6") {
     text =
-      "Con los comandos de eliminación de usuarios, puede expulsar usuarios de manera permanente, controlar el tiempo del baneo, etc, los comandos son los siguientes:  \n\n/kick: Elimina a un usuario con posibilidad de regreso. \n/ban: Elimina a un usuario haciendo reply a su mensaje o con alias/ID. \n\n/rban <razón>: Elimina a un usuario añadiendo la razon de su eliminacion. \n\n/tban <días>: Establece el tiempo de baneo del usuario (El tiempo se determina en días, Ejemplo: /tban 1, /tban 2, etc.).";
+      "Con los comandos de eliminación de usuarios, puede expulsar usuarios de manera permanente, controlar el tiempo del baneo, etc, los comandos son los siguientes:  \n\n/kick: Elimina a un usuario con posibilidad de regreso. \n/ban: Elimina a un usuario haciendo reply a su mensaje o con alias/ID. \n\n/ban <ID>: Elimina a un usuario añadiendo su identificador. \n\n/tban <días>: Establece el tiempo de baneo del usuario (El tiempo se determina en días, Ejemplo: /tban 1, /tban 2, etc.).";
   }
   if (action === "7") {
     text =
