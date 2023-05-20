@@ -141,6 +141,99 @@ bot.onText(/\/unban (.+)/, (msg, match) => {
     }
   });
 });
+
+
+
+bot.onText(/\/warn (.+)/, async (msg, match) => {
+  const chatId = msg.chat.id;
+  const userId = match[1];
+  const userIds = msg.from.id;
+
+  try {
+    const chatMember = await bot.getChatMember(chatId, userIds);
+    if (chatMember.status !== "creator" && chatMember.status !== "administrator") {
+      bot.sendMessage(chatId, "Solo el creador y administradores pueden usar este comando :(");
+      return;
+    }
+
+    const userRef = db.collection('users').doc(userId);
+    const userDoc = await userRef.get();
+
+    if (!userDoc.exists) {
+      console.error(`¡El usuario con ID ${userId} no existe!`);
+      return;
+    }
+
+    const userData = userDoc.data();
+    let warnings = userData.warnings || 0;
+
+    if (warnings >= 3) {
+      warnings = 0;
+    } else {
+      warnings++;
+    }
+
+    await userRef.set({ warnings }, { merge: true });
+
+    bot.sendMessage(chatId, `🔪<i>¡Cuidado titán!</i> \n\n<i> 🛑 Advertencia: <b>${warnings}/3</b> </i> \n\n🐬<b>ID:</b> (<code>${userId}</code>)`, { parse_mode: "HTML" });
+
+    if (warnings === 3) {
+      await bot.kickChatMember(chatId, userId);
+      bot.sendMessage(chatId, `🛑¡Este es el fin!, <i>El usuario ${userId} ha sido eliminado del grupo, ¡Suerte!</i>`, { parse_mode: "HTML" });
+    }
+  } catch (error) {
+    console.error(`¡Ocurrió un error en la función /warn: ${error}!`);
+  }
+});
+
+
+
+bot.onText(/\/unwarn (.+)/, (msg, match) => {
+  const chatId = msg.chat.id;
+  var userIds = msg.from.id;
+  const userId = match[1];
+
+  bot.getChatMember(chatId, userIds).then(function (data) {
+    if (data.status == "creator" || data.status == "administrator") {
+      const userRef = db.collection('users').doc(userId);
+      userRef.get()
+        .then((doc) => {
+          const data = doc.data();
+          const warnings = data ? data.warnings || 0 : 0;
+    
+          // Verificar si el usuario tiene al menos una advertencia para poder removerla
+          if (warnings > 0) {
+            // Remover una advertencia al usuario
+            userRef.set({
+              warnings: warnings - 1,
+            }, { merge: true })
+              .then(() => {
+                bot.sendMessage(
+                  chatId,
+                  `🔪<i>¡Perfecto!</i> \n\n<i> ✅ Se ha removido una advertencia al usuario: <b>${warnings - 1}/3</b> </i> \n\n🐬<b>ID:</b> (<code>${userId}</code>)`,
+                  { parse_mode: "HTML" }
+                );
+              })
+              .catch((error) => {
+                console.error(`¡Error al remover la advertencia!`);
+              });
+          } else {
+            bot.sendMessage(chatId, `<i>¡Hey, Hey!, El usuario <code>${userId}</code> no tiene advertencias para remover.</i>`, {parse_mode: "HTML"});
+          }
+        })
+        .catch((error) => {
+          console.error(`Error al obtener las advertencias del usuario: ${error}`);
+        });
+   
+     
+    } else {
+      bot.sendMessage(
+        chatId,
+        "Solo el creador y administradores pueden usar este comando:("
+      );
+    }
+  });
+});
 /**************************************************COMANDO START**************************************************/
 var bannedPeople = getBanned();
 bot.onText(/^\/start/, (msg) => {
@@ -3420,7 +3513,7 @@ bot.on("callback_query", function onCallbackQuery(callbackQuery) {
   }
   if (action === "6") {
     text =
-      "Con los comandos de eliminación de usuarios, puede expulsar usuarios de manera permanente, controlar el tiempo del baneo, etc, los comandos son los siguientes:  \n\n/kick: Elimina a un usuario con posibilidad de regreso. \n/ban: Elimina a un usuario haciendo reply a su mensaje o con alias/ID. \n\n/ban <ID>: Elimina a un usuario añadiendo su identificador. \n\n/tban <días>: Establece el tiempo de baneo del usuario (El tiempo se determina en días, Ejemplo: /tban 1, /tban 2, etc.).";
+      "Con los comandos de eliminación de usuarios, puede expulsar usuarios de manera permanente, controlar el tiempo del baneo, etc, los comandos son los siguientes:  \n\n/kick: Elimina a un usuario con posibilidad de regreso. \n/ban: Elimina a un usuario haciendo reply a su mensaje o con alias/ID. \n\n/ban <ID>: Elimina a un usuario añadiendo su identificador. \n\n/tban <días>: Establece el tiempo de baneo del usuario (El tiempo se determina en días, Ejemplo: /tban 1, /tban 2, etc.) \n\n/warn <ID>: Agrega una advertencia al usuario, al llegar a 3 será eliminado del grupo. \n\n/unwarn <ID>: Remueve una advertencia del usuario.";
   }
   if (action === "7") {
     text =
