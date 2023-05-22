@@ -276,21 +276,22 @@ bot.onText(/^\/start/, (msg) => {
 });
 
 /**************************************************ID USUARIOS**************************************************/
-bot.onText(/^\/myid/, (msg) => {
+bot.onText(/\/id/, (msg) => {
   const chatId = msg.chat.id;
-  const myId = msg.from.id;
-  bot.sendMessage(chatId, `<b>🔐Tú ID es:</b> <code>${myId}</code>`, {
-    parse_mode: "HTML",
-  });
+
+  // Comprobar si el comando fue enviado en respuesta a otro mensaje
+  if (msg.reply_to_message) {
+    const userId = msg.reply_to_message.from.id;
+    bot.sendMessage(chatId, `<b>👤ID del usuario:</b> <code>${userId}</code>`, {
+      parse_mode: "HTML",
+    });
+  } else {
+    bot.sendMessage(chatId, `<b>👤Tú ID:</b> <code>${msg.from.id}</code>`, {
+      parse_mode: "HTML",
+    });
+  }
 });
 
-bot.onText(/^\/id/, (msg) => {
-  const chatId = msg.chat.id;
-  const myId = msg.from.id;
-  bot.sendMessage(chatId, `<b>🔐Tú ID es:</b> <code>${myId}</code>`, {
-    parse_mode: "HTML",
-  });
-});
 
 bot.onText(/^\/usuariosgban/, (msg) => {
   const chatId = msg.chat.id;
@@ -307,15 +308,7 @@ bot.onText(/^\/chatid/, (msg) => {
   });
 });
 
-bot.onText(/^\/userid/, (msg) => {
-  const chatId = msg.chat.id;
-  const userId = msg.reply_to_message.from.id;
 
-  bot.sendMessage(chatId, `<b>🔓ID del usuario:</b> <code>${userId}</code>`, {
-    parse_mode: "HTML",
-  }),
-    { parse_mode: "Markdown" };
-});
 
 /**************************************************REACCIONES**************************************************/
 bot.onText(/^\/besar|^\/kiss/, (msg) => {
@@ -871,45 +864,6 @@ bot.onText(/^\/del/, (msg) => {
 });
 /**************************************************OCIO EMOJIS JUEGO**************************************************/
 
-bot.onText(/^\.dardo|^\/dardo/, (msg) => {
-  const opts = {
-    emoji: "🎯",
-  };
-  bot.sendDice(msg.chat.id, opts);
-});
-
-bot.onText(/^\/dado/, (msg) => {
-  bot.sendDice(msg.chat.id);
-});
-
-bot.onText(/^\/boliche/, (msg) => {
-  const opts = {
-    emoji: "🎳",
-  };
-  bot.sendDice(msg.chat.id, opts);
-});
-
-bot.onText(/^\/tragaperra/, (msg) => {
-  const opts = {
-    emoji: "🎰",
-  };
-  bot.sendDice(msg.chat.id, opts);
-});
-
-bot.onText(/^\/basket/, (msg) => {
-  const opts = {
-    emoji: "🏀",
-  };
-  bot.sendDice(msg.chat.id, opts);
-});
-
-bot.onText(/^\/futbolito/, (msg) => {
-  const opts = {
-    emoji: "⚽",
-  };
-  bot.sendDice(msg.chat.id, opts);
-});
-
 /**************************************************CODIGOS QR**************************************************/
 
 bot.onText(/^\/qr/, function (msg) {
@@ -1372,168 +1326,7 @@ bot.onText(/^\/demoteadm/, function (msg) {
   });
 });
 
-/**************************************************PROMOVER Y DESCENDER MOD**************************************************/
 
-bot.onText(/^\/promotemod/, function (msg) {
-  var chatId = msg.chat.id;
-  var userId = msg.from.id;
-  var replyId = msg.reply_to_message.from.id;
-  var replyName = msg.reply_to_message.from.first_name;
-  var userName = msg.from.first_name;
-  var messageId = msg.message_id;
-
-  const prop = {};
-
-  prop.can_delete_message = false;
-  prop.can_change_info = false;
-  prop.can_invite_users = false;
-  prop.can_pin_messages = false;
-  prop.can_restrict_members = true;
-  prop.can_promote_members = false;
-
-  if (msg.reply_to_message == undefined) {
-    return;
-  }
-
-  bot.getChatMember(chatId, userId).then(function (data) {
-    if (data.status == "creator" || data.status == "administrator") {
-      bot.promoteChatMember(chatId, replyId, prop).then(function (result) {
-        bot.deleteMessage(chatId, messageId);
-        bot.sendMessage(
-          chatId,
-          "!" +
-            replyName +
-            " ha adquirido una nueva habilidad 🐬!. Ahora este usuario es un moderador."
-        );
-      });
-    } else {
-      bot.sendMessage(
-        chatId,
-        "Solo el creador y administradores pueden usar este comando:("
-      );
-    }
-  });
-});
-
-bot.onText(/^\/demotemod/, function (msg) {
-  var chatId = msg.chat.id;
-  var userId = msg.from.id;
-  var replyId = msg.reply_to_message.from.id;
-  var replyName = msg.reply_to_message.from.first_name;
-  var userName = msg.from.first_name;
-  var messageId = msg.message_id;
-
-  const prop = {};
-
-  prop.can_delete_message = false;
-  prop.can_change_info = false;
-  prop.can_invite_users = false;
-  prop.can_pin_messages = false;
-  prop.can_restrict_members = false;
-  prop.can_promote_members = false;
-  prop.can_manage_voice_chats = true;
-
-  if (msg.reply_to_message == undefined) {
-    return;
-  }
-
-  bot.getChatMember(chatId, userId).then(function (data) {
-    if (data.status == "creator" || data.status == "administrator") {
-      bot.promoteChatMember(chatId, replyId, prop).then(function (result) {
-        bot.deleteMessage(chatId, messageId);
-        bot.sendMessage(
-          chatId,
-          "🌬Realizado. " + replyName + ", ya no es moderador, que pena:/."
-        );
-      });
-    } else {
-      bot.sendMessage(
-        chatId,
-        "Solo el creador y administradores pueden usar este comando:("
-      );
-    }
-  });
-});
-
-/**************************************************PROMOVER Y DESCENDER GERENTE**************************************************/
-bot.onText(/^\/promoteger/, function (msg) {
-  var chatId = msg.chat.id;
-  var userId = msg.from.id;
-  var replyId = msg.reply_to_message.from.id;
-  var replyName = msg.reply_to_message.from.first_name;
-  var userName = msg.from.first_name;
-  var messageId = msg.message_id;
-
-  const prop = {};
-
-  prop.can_delete_message = true;
-  prop.can_change_info = false;
-  prop.can_invite_users = false;
-  prop.can_pin_messages = false;
-  prop.can_restrict_members = false;
-  prop.can_promote_members = false;
-
-  if (msg.reply_to_message == undefined) {
-    return;
-  }
-
-  bot.getChatMember(chatId, userId).then(function (data) {
-    if (data.status == "creator" || data.status == "administrator") {
-      bot.promoteChatMember(chatId, replyId, prop).then(function (result) {
-        bot.deleteMessage(chatId, messageId);
-        bot.sendMessage(
-          chatId,
-          "🐟Ahora " + replyName + "será parte del team, es gerente."
-        );
-      });
-    } else {
-      bot.sendMessage(
-        chatId,
-        "Solo el creador y administradores pueden usar este comando:("
-      );
-    }
-  });
-});
-bot.onText(/^\/demoteger/, function (msg) {
-  var chatId = msg.chat.id;
-  var userId = msg.from.id;
-  var replyId = msg.reply_to_message.from.id;
-  var replyName = msg.reply_to_message.from.first_name;
-  var userName = msg.from.first_name;
-  var messageId = msg.message_id;
-
-  const prop = {};
-
-  prop.can_delete_message = false;
-  prop.can_change_info = false;
-  prop.can_invite_users = false;
-  prop.can_pin_messages = false;
-  prop.can_restrict_members = false;
-  prop.can_promote_members = false;
-
-  if (msg.reply_to_message == undefined) {
-    return;
-  }
-
-  bot.getChatMember(chatId, userId).then(function (data) {
-    if (data.status == "creator" || data.status == "administrator") {
-      bot.promoteChatMember(chatId, replyId, prop).then(function (result) {
-        bot.deleteMessage(chatId, messageId);
-        bot.sendMessage(
-          chatId,
-          "Uy desterraron" +
-            replyName +
-            "al profundo del oceano🌊, ya no es gerente."
-        );
-      });
-    } else {
-      bot.sendMessage(
-        chatId,
-        "Solo el creador y administradores pueden usar este comando:("
-      );
-    }
-  });
-});
 
 /**************************************************MODOS SPAM**************************************************/
 bot.onText(/\/spam (.+)/, (msg, match) => {
@@ -3318,10 +3111,6 @@ const menuOpts = {
       ],
       [
         {
-          text: "🔋Pases",
-          callback_data: "9",
-        },
-        {
           text: "🔄Canje",
           callback_data: "10",
         },
@@ -3379,16 +3168,8 @@ const menuOpts = {
           text: "🇪🇸Traductor",
           callback_data: "29",
         },
-        {
-          text: "🎥YT",
-          callback_data: "30",
-        },
       ],
       [
-        {
-          text: "✏️Unicode",
-          callback_data: "36",
-        },
         {
           text: "🔗Telegraph",
           callback_data: "37",
@@ -3500,7 +3281,7 @@ bot.on("callback_query", function onCallbackQuery(callbackQuery) {
   }
   if (action === "3") {
     text =
-      "Los niveles de administración otorgaran permisos a un usuario especifico sin ningun cargo en el grupo, los comandos disponibles se encuentran a continuación: \n\n/promoteadm: Promueve a un usuario con permisos de administrador del grupo. \n/demoteadm: Quita a un usuario los permisos de administrador del grupo.\n\n/promotemod: Promueve a un usuario como moderador. \n/demotemod: Quita de moderador a un usuario. \n\n/promoteger: Promueve a un usuario como gerente del grupo. \n/demoteger: Quita permisos de gerente a un usuario.";
+      "Los niveles de administración otorgaran permisos a un usuario especifico sin ningun cargo en el grupo, los comandos disponibles se encuentran a continuación: \n\n/promoteadm: Promueve a un usuario con permisos de administrador del grupo.";
   }
 
   if (action === "4") {
@@ -3524,11 +3305,6 @@ bot.on("callback_query", function onCallbackQuery(callbackQuery) {
       "Un mensaje fijado en el chat tiene como objetivo principal tener presente un mensaje especifico en el chat para los miembros del grupo, los siguientes comandos le ayudaran a realizar esta tarea: \n\n/pin: Fija un mensaje en el grupo respondiendo un mensaje. \n\n/unpin: Desfija un mensaje en el grupo. \n\n/unallpin: Desfija todos los mensajes pineados actuales.";
   }
 
-  if (action === "9") {
-    text =
-      "El creador y el admisnitrador del grupito, puede establecer diferentes permisos para los usuarios, los podemos ver a continuacion: \n\n/setpoll <on/off>: Cierra el reenvío y envío de encuestas para usuarios, dependiendo del modo activar o desactivar esta función. \n\n/setmedia <on/off>: Desactiva en el grupito el envío y reenvío de contenido multimedia, el modo se activa o desactiva dependiendo de la elección. \n\n/setmsg <on/off>: El staff del grupo bloquea la entrada de mensajes en el grupo, el grupito queda silenciado hasta revertir la acción. \n\n/setpin <on/off>: El creador o administrador del grupo puede permitir a los usuarios del grupito fijar mensajes, USAR BAJO SU RESPONSABILIDAD, por defecto este permiso viene desactivado. ";
-  }
-
   if (action === "10") {
     text =
       "Hagamos cambios en el grupito tan fácil con los siguientes comandos: \n\n/settitledef: Establece el titulo del administrador por defecto: GuraADMON. \n\n/settitle + Titulo de admin.: Establece el titulo personalizado del administrador haciendo reply a su mensaje. \n\n/setgtitle <Nuevo nombre>: Establece el nombre del grupo. \n\n/setdescrip <Nueva descripción>: Establece la descripcion personalizada del grupo.";
@@ -3545,7 +3321,7 @@ bot.on("callback_query", function onCallbackQuery(callbackQuery) {
   }
   if (action === "14") {
     text =
-      "ID de usuarios: \n\n/myid: Devuelve un mensaje con tu identificador de usuario. \n\n/userid: Devuelve un mensaje con el ID del usuario haciendo reply a su mensaje.\n\n/chatid: Devuelve un mensaje con el ID del grupo.";
+      "ID de usuarios: \n\n/id: Devuelve un mensaje con tu identificador de usuario o en su respuesta a un usuario obtienes su ID. \n\n/chatid: Devuelve un mensaje con el ID del grupo.";
   }
   if (action === "15") {
     text =
@@ -3571,7 +3347,7 @@ bot.on("callback_query", function onCallbackQuery(callbackQuery) {
   }
   if (action === "23") {
     text =
-      "Otros comandos de ocio extras: \n\n/mibio: Muestra tú biografía con los usuarios del grupo, pero, ¡No sabes que sorpresa te salté!. \n\n/qtcompatibles: Responde al mensaje de un usuario para conocer que probabilidades hay tener éxito como pareja owo. \n\n/dardo: Lanza un emoji de dardo probando tu suerte. \n/dado: Lanza un dado donde saldra un numero aleatorio del 1 al 6. \n/boliche: Lanza una bola de boliche a ver cuantos pinos tiras. \n/tragaperra: Vamos, mete una moneda a la maquina y prueba tu suerte. \n/basket: Toma una pelota e intenta canastar, Suerte. \n/futbolito: ¿Seras capaz de meter un gol?, Intentalo. \n\n/siono: Crea encuestas añadiendo el mensaje a este comando con respuestas predefinidas Si, No, Tal vez. \n\n/aquiz: Diviertete respondiendo la trivia con preguntas de anime, japón y cultura general. \n\n/basta: Responde acertijos y divertete pensando la respuesta.";
+      "Otros comandos de ocio extras: \n\n/mibio: Muestra tú biografía con los usuarios del grupo, pero, ¡No sabes que sorpresa te salté!. \n\n/qtcompatibles: Responde al mensaje de un usuario para conocer que probabilidades hay tener éxito como pareja. \n\n/aquiz: Diviertete respondiendo la trivia con preguntas de anime, japón y cultura general. \n\n/basta: Responde acertijos y divertete pensando la respuesta.";
   }
   if (action === "24") {
     bot.answerCallbackQuery({
@@ -3586,15 +3362,7 @@ bot.on("callback_query", function onCallbackQuery(callbackQuery) {
   }
   if (action === "29") {
     text =
-      "Los siguientes comandos te ayudaran a traducir texto fácilmente: \n\n/tr <codígo ISO>: Responde a un texto para traducirlo al lenguaje especificado en el comando, el bot detecta el idioma de origen.\nEjemplos: /tr es, /tr en, /tr pt \n\n/lenguajes: El bot muestra los lenguajes disponibles para ser utilizados en el traductor. \n\n/ytr <es>: Traduce texto del idioma origen íngles al español con el traductor de Yandex.";
-  }
-  if (action === "30") {
-    text =
-      "Gawr Gura traé para ti búsquedas en YouTube en Telegram, de una manera muy sencilla de utilizar: \n\n/yt <búsqueda>: Gawr gura responde con el video más popular de la búsqueda. \n\n/ytvsearch <búsqueda>: El bot devuelve los 5 vídeos con más recuentos de vistas y populares. \n\n/ytvrsearch <búsqueda>: Filtra los primeros 5 vídeos para la consulta más recientes. \n\n/ytpsearch <búsqueda>: El bot responde con las 5 listas de reproducción más populares en la plataforma.";
-  }
-  if (action === "36") {
-    text =
-      "¿Te gusta darle un toque diferente a tus textos?, Si es así Gawr Gura, vino a traer un estilo diferente a tus textos con los siguientes comandos: \n\n/uf <texto>: El texto añadido al comando se transformara así: ｇａｗｒ ｇｕｒａ. \n\n/ui <texto>: El texto añadido se invierte al comando: ƃɐʍɹ ƃnɹɐ. \n\n/uc <texto>: El texto agregado al comando tendrá como resultado: ⓖⓐⓦⓡ ⓖⓤⓡⓐ. \n\n/up <texto>: El texto agregado al comando cambiará el formato al siguiente ejemplo: ⒢⒜⒲⒭ ⒢⒰⒭⒜\n\n/urd <texto>: El texto insertado al comando tendrá el siguiente estilo: ġäẅṛ ġüṛä \n\n/usp <texto>: El texto insertado tornará como resultado: ɢᴀᴡʀ ɢᴜʀᴀ \n\n/ust <texto>: El texto agregado tendrá el siguiente estilo: ǥȺwɍ ǥᵾɍȺ \n\n/ur <texto>: El texto agregado al comando se pinta al réves: gAwᴙ gUᴙA";
+      "Los siguientes comandos te ayudaran a traducir texto fácilmente: \n\n/tr <codígo ISO>: Responde a un texto para traducirlo al lenguaje especificado en el comando, el bot detecta el idioma de origen.\nEjemplos: /tr es, /tr en, /tr pt \n\n/lenguajes: El bot muestra los lenguajes disponibles para ser utilizados en el traductor.";
   }
   if (action === "37") {
     text =
@@ -3602,7 +3370,7 @@ bot.on("callback_query", function onCallbackQuery(callbackQuery) {
   }
   if (action === "38") {
     text =
-      "Una que otra sorpresa encontrarás en este modúlo: \n\n/swiki <búsqueda>: Devuelve el recurso informativo completo de la busqueda  usando Wikipedia. \n\n/tts <texto>: El texto que añades al comando, el bot lo responderá con un archivo de audio. \n\n/searchduck <búsqueda>: Devuelve el primer resultado de Duck Duck Go (Internet) para esta consulta. \n\n/paste: Comparte código con tus amigos o simplemente comparte texto respondiendo con este comando a mensajes con el texto que deceas compartir, el bot responderá con una URL cargada con el texto. \n\n/diccionario <búsqueda>: Encuentra la definición de una palabra en el diccionario de la la real academia española. \n\n/clima <búsqueda>: Devuelve el estado meteorológico más actual sobre el lugar buscado. \n\nEjemplo: /clima mexico. \n\n/pais <búsqueda>: Contiene datos de un pais que se ingrese en la busqueda, tales como el código alfa, código de llamada, capital, etc.. \n\nNota: La búsqueda es exclusiva para un país en especifico, como Colombia, México, Perù, etc. \n\n/qr <URL>: El bot mandará en respuesta el QR creado apartir de la URL proporcionada listo para ser compartido. \n\n/upimgur: Responde a una imagen para cargarla a imgur y el bot responde con la url ya cargada. \n\n/gif <búsqueda>: El bot responde con un gif apartir de la consulta. \n\n/img <búsqueda>: El bot responde con una imagen a apartir de la consulta.\n\n/movie <nombre de pelicula>: Encuentra tús peliculas favoritas, con una descripción detallada. \n\n/serie <nombre de serie>: Haz la búsqueda de tus serie favoritas de plataformas famosas como Netflix, TV shows, etc. \n\n/nasaphoto: el bot responde con la fotogtafía del día tomada por la NASA.";
+      "Una que otra sorpresa encontrarás en este modúlo: \n\n/ytvsearch <búsqueda>: El bot devuelve los 5 vídeos con más recuentos de vistas y populares. \n\n/swiki <búsqueda>: Devuelve el recurso informativo completo de la busqueda  usando Wikipedia. \n\n/tts <texto>: El texto que añades al comando, el bot lo responderá con un archivo de audio. \n\n/searchduck <búsqueda>: Devuelve el primer resultado de Duck Duck Go (Internet) para esta consulta. \n\n/paste: Comparte código con tus amigos o simplemente comparte texto respondiendo con este comando a mensajes con el texto que deceas compartir, el bot responderá con una URL cargada con el texto. \n\n/diccionario <búsqueda>: Encuentra la definición de una palabra en el diccionario de la la real academia española. \n\n/clima <búsqueda>: Devuelve el estado meteorológico más actual sobre el lugar buscado. \n\nEjemplo: /clima mexico. \n\n/qr <URL>: El bot mandará en respuesta el QR creado apartir de la URL proporcionada listo para ser compartido. \n\n/gif <búsqueda>: El bot responde con un gif apartir de la consulta. \n\n/img <búsqueda>: El bot responde con una imagen a apartir de la consulta.\n\n/movie <nombre de pelicula>: Encuentra tús peliculas favoritas, con una descripción detallada. \n\n/serie <nombre de serie>: Haz la búsqueda de tus serie favoritas de plataformas famosas como Netflix, TV shows, etc. \n\n/nasaphoto: el bot responde con la fotogtafía del día tomada por la NASA.";
   }
   if (action === "39") {
     bot.answerCallbackQuery({
@@ -3618,7 +3386,7 @@ bot.on("callback_query", function onCallbackQuery(callbackQuery) {
   }
   if (action === "41") {
     text =
-      "Los comandos para este modúlo se encuentran a continuación: \n\n/fanime <búsqueda/nombre de anime>: Encuentra la información especifica para el anime que este buscando.\n\n/anime <búsqueda/nombre de anime>: Encuentra información de un anime desde la fuente de anilist.\n\n/manga <búsqueda/nombre del manga>: El bot responde con la información detallada de la consulta(Mangas en emisión, finalizados y novelas ligeras). \n\n/caracter <búsqueda/personaje>: Encuentra a tus personajes favoritos con este comando y obtienes su información detallada. \n\n/fsearchanime: ¿Buscas el nombre de un anime y traes consigo la imagen?, con este comando responde a esas imagenes y busca entre +22,330 horas de anime el nombre del anime al que coincide y una que otra sorpresa más.\n\n/wallpaper, /w: Encuentra Wallpapers random de anime(SFW), el bot responderá con la imagen y el documento. \n\n/2wallpaper, /2w: El bot responde con grupos de imagenes aleatorias. \n\n/iwall <búsqueda>: Encuentra wallpapers de anime a partir de la consulta que se realize. \n\n/pokemon <búsqueda/nombre del pokemón>: Revela la información completa del pokemón, con sus habilidades, estadisticas, etc. \n\n/quote: Gura responde con frases épicas de personajes anime.";
+      "Los comandos para este modúlo se encuentran a continuación:\n\n/anime <búsqueda/nombre de anime>: Encuentra información de un anime desde la fuente de anilist.\n\n/manga <búsqueda/nombre del manga>: El bot responde con la información detallada de la consulta(Mangas en emisión, finalizados y novelas ligeras). \n\n/caracter <búsqueda/personaje>: Encuentra a tus personajes favoritos con este comando y obtienes su información detallada. \n\n/fsearchanime: ¿Buscas el nombre de un anime y traes consigo la imagen?, con este comando responde a esas imagenes y busca entre +22,330 horas de anime el nombre del anime al que coincide y una que otra sorpresa más.\n\n/wallpaper, /w: Encuentra Wallpapers random de anime(SFW), el bot responderá con la imagen y el documento. \n\n/2wallpaper, /2w: El bot responde con grupos de imagenes aleatorias. \n\n/iwall <búsqueda>: Encuentra wallpapers de anime a partir de la consulta que se realize. \n\n/pokemon <búsqueda/nombre del pokemón>: Revela la información completa del pokemón, con sus habilidades, estadisticas, etc. \n\n/quote: Gura responde con frases épicas de personajes anime.";
   }
   if (action === "42") {
     text =
@@ -3826,194 +3594,6 @@ bot.onText(/\/ytvsearch (.+)/, function (msg, match) {
   );
 });
 
-bot.onText(/\/yt (.+)/, function (msg, match) {
-  var yt = match[1];
-  var chatid = msg.chat.id;
-  request(
-    `https://www.googleapis.com/youtube/v3/search?key=AIzaSyD0KQEl_Yall8lL5A2tMUTd9TbtXk103fE&q=${yt}&part=snippet,id&order=viewCount&maxResults=1&type=video`,
-    function (error, response, body) {
-      try {
-        if (!error && response.statusCode == 200) {
-          var res = JSON.parse(body);
-          bot.sendMessage(
-            chatid,
-            `🎞<i><b>Resultado de vídeo en YouTube para la búsqueda:</b></i> \n\n1️⃣ - ⭐️⭐️⭐️⭐️⭐️\n🎥<b>Título:</b> <code>${res.items[0].snippet.title}</code>\n\n📄<b>Descripción:</b> <code>${res.items[0].snippet.description}</code>`,
-            {
-              parse_mode: "HTML",
-              reply_markup: {
-                inline_keyboard: [
-                  [
-                    {
-                      text: "Ir al vídeo→",
-                      url: `http://www.youtube.com/watch?v=${res.items[0].id.videoId}`,
-                      callback_data: "any",
-                    },
-                  ],
-                ],
-              },
-            }
-          );
-        }
-      } catch (e) {
-        bot.sendMessage(chatid, "No he dado con la búsqueda:(");
-      }
-    }
-  );
-});
-
-bot.onText(/\/ytvrsearch (.+)/, function (msg, match) {
-  var ytvr = match[1];
-  var chatid = msg.chat.id;
-  request(
-    `https://www.googleapis.com/youtube/v3/search?key=AIzaSyD0KQEl_Yall8lL5A2tMUTd9TbtXk103fE&q=${ytvr}&part=snippet,id&order=date&maxResults=5&type=video`,
-    function (error, response, body) {
-      try {
-        if (!error && response.statusCode == 200) {
-          var res = JSON.parse(body);
-          bot.sendMessage(
-            chatid,
-            `🔥<i><b>Resultados de vídeos más recientes en YouTube para la búsqueda:</b></i> \n\n1️⃣-🔥\n🎥<b>Título:</b> <code>${res.items[0].snippet.title}</code>\n
-              \n2️⃣-🔥\n🎥<b>Título:</b> <code>${res.items[1].snippet.title}</code>\n 
-              \n3️⃣-🔥\n🎥<b>Título:</b> <code>${res.items[2].snippet.title}</code>\n 
-              \n4️⃣-🔥\n🎥<b>Título:</b> <code>${res.items[3].snippet.title}</code>\n
-              \n5️⃣-🔥\n🎥<b>Título:</b> <code>${res.items[4].snippet.title}</code>\n`,
-            {
-              parse_mode: "HTML",
-              reply_markup: {
-                inline_keyboard: [
-                  [
-                    {
-                      text: "1️⃣Ir al vídeo→",
-                      url: `http://www.youtube.com/watch?v=${res.items[0].id.videoId}`,
-                      callback_data: "any",
-                    },
-                  ],
-                  [
-                    {
-                      text: "2️⃣Ir al vídeo→",
-                      url: `http://www.youtube.com/watch?v=${res.items[1].id.videoId}`,
-                      callback_data: "any",
-                    },
-                    {
-                      text: "3️⃣Ir al vídeo→",
-                      url: `http://www.youtube.com/watch?v=${res.items[2].id.videoId}`,
-                      callback_data: "any",
-                    },
-                  ],
-                  [
-                    {
-                      text: "4️⃣Ir al vídeo→",
-                      url: `http://www.youtube.com/watch?v=${res.items[3].id.videoId}`,
-                      callback_data: "any",
-                    },
-                    {
-                      text: "5️⃣Ir al vídeo→",
-                      url: `http://www.youtube.com/watch?v=${res.items[4].id.videoId}`,
-                      callback_data: "any",
-                    },
-                  ],
-                ],
-              },
-            }
-          );
-        }
-      } catch (e) {
-        bot.sendMessage(chatid, "No he dado con la búsqueda:(");
-      }
-    }
-  );
-});
-
-bot.onText(/\/ytpsearch (.+)/, function (msg, match) {
-  var ytp = match[1];
-  var chatid = msg.chat.id;
-  request(
-    `https://www.googleapis.com/youtube/v3/search?key=AIzaSyD0KQEl_Yall8lL5A2tMUTd9TbtXk103fE&q=${ytp}&part=snippet,id&order=viewCount&maxResults=5&type=playlist`,
-    function (error, response, body) {
-      try {
-        if (!error && response.statusCode == 200) {
-          var res = JSON.parse(body);
-          bot.sendMessage(
-            chatid,
-            `🎞<i><b>Resultados de listas de reproducción en YouTube más populares para la búsqueda:</b></i> \n\n1️⃣-⭐️\n🎥<b>Título:</b> <code>${res.items[0].snippet.title}</code>
-              \n2️⃣-⭐️\n🎥<b>Título:</b> <code>${res.items[1].snippet.title}</code>\n
-              \n3️⃣-⭐️\n🎥<b>Título:</b> <code>${res.items[2].snippet.title}</code>\n
-              \n4️⃣-⭐️\n🎥<b>Título:</b> <code>${res.items[3].snippet.title}</code>\n
-              \n5️⃣-⭐️\n🎥<b>Título:</b> <code>${res.items[4].snippet.title}</code>\n`,
-            {
-              parse_mode: "HTML",
-              reply_markup: {
-                inline_keyboard: [
-                  [
-                    {
-                      text: "1️⃣Ir a la play→",
-                      url: `https://youtube.com/playlist?list=${res.items[0].id.playlistId}`,
-                      callback_data: "any",
-                    },
-                  ],
-                  [
-                    {
-                      text: "2️⃣Ir a la play→",
-                      url: `https://youtube.com/playlist?list=${res.items[1].id.playlistId}`,
-                      callback_data: "any",
-                    },
-                    {
-                      text: "3️⃣Ir a la play→",
-                      url: `https://youtube.com/playlist?list=${res.items[2].id.playlistId}`,
-                      callback_data: "any",
-                    },
-                  ],
-                  [
-                    {
-                      text: "4️⃣Ir a la play→",
-                      url: `https://youtube.com/playlist?list=${res.items[3].id.playlistId}`,
-                      callback_data: "any",
-                    },
-                    {
-                      text: "5️⃣Ir a la play→",
-                      url: `https://youtube.com/playlist?list=${res.items[4].id.playlistId}`,
-                      callback_data: "any",
-                    },
-                  ],
-                ],
-              },
-            }
-          );
-        }
-      } catch (e) {
-        bot.sendMessage(chatid, "No he dado con la búsqueda:(");
-        console.log(e);
-      }
-    }
-  );
-});
-
-bot.onText(/\/ytr (.+)/, function (msg, match) {
-  var trad = match[1];
-  var trs = msg.reply_to_message.text;
-  var chatid = msg.chat.id;
-  if (trad === "es") {
-    request(
-      `https://translate.yandex.net/api/v1.5/tr.json/translate?key=trnsl.1.1.20210706T033658Z.7f7095d122c55a9a.3c70bab2d04d74a3edbb1c8992894a29dc4167bb&text=${trs}&lang=es`,
-      function (error, response, body) {
-        try {
-          if (!error && response.statusCode == 200) {
-            var res = JSON.parse(body);
-            bot.sendMessage(
-              chatid,
-              `Texto traducido del inglés al español: \n\n${res.text}`,
-              {
-                parse_mode: "HTML",
-              }
-            );
-          }
-        } catch (e) {
-          console.log(e);
-        }
-      }
-    );
-  }
-});
 
 bot.onText(/\/swiki (.+)/, function (msg, match) {
   var duck = match[1];
@@ -4059,34 +3639,7 @@ bot.onText(/\/gif (.+)/, function (msg, match) {
   );
 });
 
-bot.onText(/\/pais (.+)/, function (msg, match) {
-  var pais = match[1];
-  var chatid = msg.chat.id;
-  request(
-    `https://restcountries.eu/rest/v2/name/${pais}`,
-    function (error, response, body) {
-      try {
-        if (!error && response.statusCode == 200) {
-          var res = JSON.parse(body);
-          bot.sendMessage(
-            chatid,
-            `╭┈┈┈⋆┈┈⊰ 🇲🇽 ⊱┈┈⋆┈┈┈╮\n👑<b>País:</b> <code>${res[0].name}</code>
-          \n<i>Codigo alfa-2:</i> <code>${res[0].alpha2Code}</code>\n<i>Codigo alfa-3:</i> <code>${res[0].alpha3Code}</code>
-          \n📱<i>Codigo de llamada:</i> <code>+${res[0].callingCodes}</code>
-          \n<i>Capital:</i> <code>${res[0].capital}</code>
-          \n🌐<i>Latitud y longitud:</i> <code>${res[0].latlng}</code>
-          \n📊<i>GINI:</i> <code>${res[0].gini}</code>
-          \n<i>🗃Traducciones:</i> 
-          \n<i>🇪🇸Español:</i> <code>${res[0].translations.es}</code>\n<i>🇩🇪Aleman:</i> <code>${res[0].translations.de}</code>\n<i>🇫🇷Francés:</i> <code>${res[0].translations.fr}</code>\n<i>🇯🇵Japonés:</i> <code>${res[0].translations.ja}</code>\n<i>🇮🇹Italiano:</i> <code>${res[0].translations.it}</code>\n<i>🇳🇱Bretón:</i> <code>${res[0].translations.br}</code>\n<i>🇧🇷Portugués:</i> <code>${res[0].translations.pt}</code>\n<i>🇳🇱Neerlandés:</i> <code>${res[0].translations.nl}</code>\n<i>🇭🇷Croata:</i> <code>${res[0].translations.hr}</code>\n<i>🇮🇷Persa:</i> <code>${res[0].translations.fa}</code>\n╰┈┈┈⋆┈┈⊰ 🇲🇽 ⊱┈┈⋆┈┈┈╯`,
-            { parse_mode: "HTML" }
-          );
-        }
-      } catch (e) {
-        console.log(e);
-      }
-    }
-  );
-});
+
 
 bot.onText(/\/fsearchanime/, function (msg) {
   var chatId = msg.chat.id;
@@ -5471,64 +5024,10 @@ bot.onText(/\/diccionario (.+)/, function (msg, match) {
   })();
 });
 /*****************************************UNICODEEEEE*******************************************************************/
-bot.onText(/\/uf (.+)/, function (msg, match) {
-  var d = match[1];
-  var str = d;
-  var unicody = toUnicode(str, "fullWidth");
-  bot.sendMessage(msg.chat.id, unicody);
-});
 
-bot.onText(/\/ui (.+)/, function (msg, match) {
-  var d = match[1];
-  var str = d;
-  var unicody = toUnicode(str, "inverted");
-  bot.sendMessage(msg.chat.id, unicody);
-});
-
-bot.onText(/\/uc (.+)/, function (msg, match) {
-  var d = match[1];
-  var str = d;
-  var unicody = toUnicode(str, "circled");
-  bot.sendMessage(msg.chat.id, unicody);
-});
-
-bot.onText(/\/up (.+)/, function (msg, match) {
-  var d = match[1];
-  var str = d;
-  var unicody = toUnicode(str, "parenthesized");
-  bot.sendMessage(msg.chat.id, unicody);
-});
-
-bot.onText(/\/urd (.+)/, function (msg, match) {
-  var d = match[1];
-  var str = d;
-  var unicody = toUnicode(str, "rockDots");
-  bot.sendMessage(msg.chat.id, unicody);
-});
-
-bot.onText(/\/usp (.+)/, function (msg, match) {
-  var d = match[1];
-  var str = d;
-  var unicody = toUnicode(str, "smallCaps");
-  bot.sendMessage(msg.chat.id, unicody);
-});
-
-bot.onText(/\/ust (.+)/, function (msg, match) {
-  var d = match[1];
-  var str = d;
-  var unicody = toUnicode(str, "stroked");
-  bot.sendMessage(msg.chat.id, unicody);
-});
-
-bot.onText(/\/ur (.+)/, function (msg, match) {
-  var d = match[1];
-  var str = d;
-  var unicody = toUnicode(str, "reversed");
-  bot.sendMessage(msg.chat.id, unicody);
-});
 
 /*****************************************UNICODeeeeEEEEE*******************************************************************/
-bot.onText(/\/dv (.+)/, function (msg, match) {
+/* bot.onText(/\/dv (.+)/, function (msg, match) {
   var d = match[1];
   gis(d, logResults);
 
@@ -5560,7 +5059,7 @@ bot.onText(/\/dv (.+)/, function (msg, match) {
       ]);
     }
   }
-});
+}); */
 /*****************************************telegraph*******************************************************************/
 bot.onText(/^\/tf/, function (msg) {
   var chatId = msg.chat.id;
@@ -5607,38 +5106,7 @@ bot.onText(/^\/tv/, function (msg) {
     })();
   });
 });
-/*****************************************UNICODEEEEE*******************************************************************/
-bot.onText(/\/fanime (.+)/, function (msg, match) {
-  var a = match[1];
-  var chatid = msg.chat.id;
-  anime
-    .search(a)
-    .then((res) => {
-      try {
-        bot
-          .sendMessage(
-            chatid,
-            `🧧<i><b>Nombre:</b></i> <i>${res[0].name}</i> <a href="${res[0].thumbnail}">ㅤ</a> \n\n⌛️<i><b>Status:</b></i> <code>${res[0].generalInfo.status}</code> \n\n⚔️<i><b>Generos:</b></i> <code>${res[0].genrers[0]}</code>, <code>${res[0].genrers[1]}</code>, <code>${res[0].genrers[2]}</code> \n\n🎥<i><b>Tipo:</b></i> <code>${res[0].generalInfo.type}</code> \n\n🎞<i><b>Episodios:</b></i> <code>${res[0].generalInfo.episodes}</code> \n\n⭐️<i><b>Vistas:</b></i> <code>${res[0].generalInfo.views}</code>
-        \n 🎎<i><b>Sinopsis:</b></i> <i>${res[0].synopsis}</i>`,
-            { parse_mode: "HTML" }
-          )
-          .catch((err) => {
-            bot.sendMessage(
-              chatid,
-              "Intenta de nuevo, no he dado con la busqueda:("
-            );
-          });
-      } catch (e) {
-        bot.sendMessage(chatid, "No he dado con la búsqueda:(");
-        console.log(e);
-      }
-    })
-    .catch((e) => {
-      bot.sendMessage(chatid, "No he dado con la búsqueda:(");
-      console.log(e);
-    });
-});
-/**********************************     ZONA WALLPAPERS   ************************************************************** */
+
 
 bot.onText(/^\/wallpaper|^\/w/, function (msg) {
   try {
@@ -7504,163 +6972,152 @@ bot.onText(/^\/mibio|^\.mibio/, (msg) => {
     parse_mode: "Markdown",
   });
 });
-bot.onText(/^\/kiwi/, function (msg) {
-  animes.on("ready", () => {
-    animes
-      .transform({
-        photo:
-          "https://media.gq.com.mx/photos/5e220ec2ffa8c7000803441e/16:9/w_1920,c_limit/40-datos-curiosos-para-descubrir-a-scarlett-johansson.jpg",
-        // To save the image to a specific path
-        destinyFolder: "./images",
-      })
-      .then((data) => {
-        console.log("Image", data);
-      })
-      .catch((err) => {
-        console.log("Error", err);
-      });
-  });
+
+bot.onText(/\/qtcompatibles/, (msg) => {
+  const chatId = msg.chat.id;
+ 
+  // Verifica si el mensaje es una respuesta a otro mensaje
+  if (msg.reply_to_message) {
+    const usuario = msg.from.first_name;
+    const usersId = msg.reply_to_message.from.first_name;
+    var animacion = [
+      "https://acegif.com/wp-content/uploads/anime-love-53.gif",
+      "https://i.pinimg.com/originals/49/7a/55/497a5523d9b1ca23db84ecc3f5d8b1b3.gif",
+      "https://64.media.tumblr.com/99691e08eecade2f575b272eda7c2d2a/tumblr_muad2kgj1F1rjonbao1_500.gif",
+      "https://i.pinimg.com/originals/16/a2/5a/16a25ac1cc0b39ea3e6cd0aae72deeee.gif",
+      "https://acegif.com/wp-content/gif/anime-hug-59.gif",
+      "http://1.bp.blogspot.com/-WFNuVqC8aPw/Ue_mZ_FwL9I/AAAAAAAAA_Y/xTJgO3OsM7A/s1600/anime-gif-kimi-ni-todoke-Favim.com-375462_large.gif",
+      "http://1.bp.blogspot.com/-3k48PNxzdqQ/U5MXmRQMKuI/AAAAAAAAE2M/XScspSBcJJY/s1600/tumblr_n6iqk7WhUt1ts5lkuo1_500.gif",
+      "https://pa1.narvii.com/6427/269e2793b9c165850e522a3dba69b82c07ac16c2_hq.gif",
+      "https://media1.tenor.com/images/e61a14a6bd233279eb78c9c40c4f7feb/tenor.gif",
+      "http://25.media.tumblr.com/tumblr_ma95gdLpsf1raf3v8o1_500.gif",
+      "https://media1.tenor.com/images/aecb71388c86293437d8836910e4323a/tenor.gif",
+      "https://media1.tenor.com/images/be8c571dabed34840c4a0f3da4f7f88f/tenor.gif?itemid=4394528",
+      "https://pa1.narvii.com/6529/558f56a06e539d3a9a14129a8525146b7ec411de_hq.gif",
+      "http://pa1.narvii.com/6435/d6ddcd3b7e9af5b966727e2f783b846f3f041af9_00.gif",
+      "https://media1.tenor.com/images/8cd2606b19c041b95e447963f81ed3ae/tenor.gif",
+      "https://media1.tenor.com/images/482dda90417c697910d48165b064b363/tenor.gif",
+      "http://pa1.narvii.com/6358/f33d62bca49f76a9950b6ce43f56ca0ba251d4b9_00.gif",
+      "http://3.bp.blogspot.com/-iimlV6tyAt8/Ue_n86uJ64I/AAAAAAAABAU/cjnjJkCGpD4/s1600/tumblr_mla04dsokc1qd7h1xo2_500.gif",
+      "https://i.pinimg.com/originals/f5/58/d7/f558d776f20c0ec86cd02c7edd87ae13.gif",
+      "https://i.pinimg.com/originals/c8/69/7a/c8697a9a6804d0a53d8d2fb0fa31ae8f.gif",
+      "https://acegif.com/wp-content/uploads/anime-love-29.gif",
+      "https://media1.tenor.com/images/110dbddfd3d662479c214cacb754995d/tenor.gif",
+      "https://pa1.narvii.com/6143/a002ce6a73a8e0c3fc56de262bf987872806c83f_hq.gif",
+      "https://static.vix.com/es/sites/default/files/btg/sailormoon-enamorada.gif",
+    ];
+    var ma = Math.random();
+    var amorani = Math.floor(ma * animacion.length);
+  
+    var compatibles = [
+      `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *1%*`,
+      `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *2%*`,
+      `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *3%*`,
+      `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *4%*`,
+      `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *5%*`,
+      `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *6%*`,
+      `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *7%*`,
+      `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *8%*`,
+      `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *9%*`,
+      `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *10%*`,
+      `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *11%*`,
+      `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *12%*`,
+      `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *13%*`,
+      `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *14%*`,
+      `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *15%*`,
+      `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *16%*`,
+      `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *17%*`,
+      `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *18%*`,
+      `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *19%*`,
+      `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *20%*`,
+      `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *21%*`,
+      `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *22%*`,
+      `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *23%*`,
+      `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *24%*`,
+      `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *25%*`,
+      `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *26%*`,
+      `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *27%*`,
+      `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *28%*`,
+      `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *29%*`,
+      `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *30%*`,
+      `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *31%*`,
+      `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *32%*`,
+      `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *33%*`,
+      `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *34%*`,
+      `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *35%*`,
+      `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *36%*`,
+      `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *37%*`,
+      `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *38%*`,
+      `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *39%*`,
+      `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *40%*`,
+      `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *41%*`,
+      `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *42%*`,
+      `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *43%*`,
+      `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *44%*`,
+      `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *45%*`,
+      `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *46%*`,
+      `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *47%*`,
+      `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *48%*`,
+      `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *49%*`,
+      `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *50%*`,
+      `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *51%*`,
+      `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *52%*`,
+      `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *53%*`,
+      `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *54%*`,
+      `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *55%*`,
+      `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *56%*`,
+      `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *57%*`,
+      `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *58%*`,
+      `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *59%*`,
+      `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *60%*`,
+      `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *61%*`,
+      `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *62%*`,
+      `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *63%*`,
+      `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *64%*`,
+      `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *65%*`,
+      `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *66%*`,
+      `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *67%*`,
+      `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *68%*`,
+      `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *69%*`,
+      `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *70%*`,
+      `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *71%*`,
+      `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *72%*`,
+      `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *73%*`,
+      `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *74%*`,
+      `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *75%*`,
+      `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *76%*`,
+      `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *77%*`,
+      `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *78%*`,
+      `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *79%*`,
+      `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *80%*`,
+      `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *89%*`,
+      `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *90%*`,
+      `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *91%*`,
+      `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *92%*`,
+      `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *93%*`,
+      `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *94%*`,
+      `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *95%*`,
+      `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *96%*`,
+      `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *97%*`,
+      `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *98%*`,
+      `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *99%*`,
+      `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *100%*`,
+    ];
+    var ma = Math.random();
+    var amorcompatibles = Math.floor(ma * compatibles.length);
+    bot.sendAnimation(chatId, animacion[amorani], {
+      caption: compatibles[amorcompatibles],
+      parse_mode: "Markdown",
+    });
+
+  } else {
+    bot.sendMessage(chatId,`<i>¡Por favor, responde al mensaje de un usuario para verificar su compatibilidad💘!</i>.`, {parse_mode:"HTML"});
+  }
 });
 
-bot.onText(/\/f (.+)/, function (msg, match) {
-  var c = match[1];
-});
 
-bot.onText(/^\/qtcompatibles/, (msg) => {
-  var chatid = msg.chat.id;
-  var messageId = msg.reply_to_message.from.first_name;
-  const usuario = msg.from.first_name;
-  const usersId = msg.reply_to_message.from.first_name;
-  var animacion = [
-    "https://acegif.com/wp-content/uploads/anime-love-53.gif",
-    "https://i.pinimg.com/originals/49/7a/55/497a5523d9b1ca23db84ecc3f5d8b1b3.gif",
-    "https://64.media.tumblr.com/99691e08eecade2f575b272eda7c2d2a/tumblr_muad2kgj1F1rjonbao1_500.gif",
-    "https://i.pinimg.com/originals/16/a2/5a/16a25ac1cc0b39ea3e6cd0aae72deeee.gif",
-    "https://acegif.com/wp-content/gif/anime-hug-59.gif",
-    "http://1.bp.blogspot.com/-WFNuVqC8aPw/Ue_mZ_FwL9I/AAAAAAAAA_Y/xTJgO3OsM7A/s1600/anime-gif-kimi-ni-todoke-Favim.com-375462_large.gif",
-    "http://1.bp.blogspot.com/-3k48PNxzdqQ/U5MXmRQMKuI/AAAAAAAAE2M/XScspSBcJJY/s1600/tumblr_n6iqk7WhUt1ts5lkuo1_500.gif",
-    "https://pa1.narvii.com/6427/269e2793b9c165850e522a3dba69b82c07ac16c2_hq.gif",
-    "https://media1.tenor.com/images/e61a14a6bd233279eb78c9c40c4f7feb/tenor.gif",
-    "http://25.media.tumblr.com/tumblr_ma95gdLpsf1raf3v8o1_500.gif",
-    "https://media1.tenor.com/images/aecb71388c86293437d8836910e4323a/tenor.gif",
-    "https://media1.tenor.com/images/be8c571dabed34840c4a0f3da4f7f88f/tenor.gif?itemid=4394528",
-    "https://pa1.narvii.com/6529/558f56a06e539d3a9a14129a8525146b7ec411de_hq.gif",
-    "http://pa1.narvii.com/6435/d6ddcd3b7e9af5b966727e2f783b846f3f041af9_00.gif",
-    "https://media1.tenor.com/images/8cd2606b19c041b95e447963f81ed3ae/tenor.gif",
-    "https://media1.tenor.com/images/482dda90417c697910d48165b064b363/tenor.gif",
-    "http://pa1.narvii.com/6358/f33d62bca49f76a9950b6ce43f56ca0ba251d4b9_00.gif",
-    "http://3.bp.blogspot.com/-iimlV6tyAt8/Ue_n86uJ64I/AAAAAAAABAU/cjnjJkCGpD4/s1600/tumblr_mla04dsokc1qd7h1xo2_500.gif",
-    "https://i.pinimg.com/originals/f5/58/d7/f558d776f20c0ec86cd02c7edd87ae13.gif",
-    "https://i.pinimg.com/originals/c8/69/7a/c8697a9a6804d0a53d8d2fb0fa31ae8f.gif",
-    "https://acegif.com/wp-content/uploads/anime-love-29.gif",
-    "https://media1.tenor.com/images/110dbddfd3d662479c214cacb754995d/tenor.gif",
-    "https://pa1.narvii.com/6143/a002ce6a73a8e0c3fc56de262bf987872806c83f_hq.gif",
-    "https://static.vix.com/es/sites/default/files/btg/sailormoon-enamorada.gif",
-  ];
-  var ma = Math.random();
-  var amorani = Math.floor(ma * animacion.length);
 
-  var compatibles = [
-    `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *1%*`,
-    `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *2%*`,
-    `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *3%*`,
-    `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *4%*`,
-    `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *5%*`,
-    `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *6%*`,
-    `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *7%*`,
-    `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *8%*`,
-    `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *9%*`,
-    `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *10%*`,
-    `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *11%*`,
-    `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *12%*`,
-    `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *13%*`,
-    `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *14%*`,
-    `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *15%*`,
-    `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *16%*`,
-    `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *17%*`,
-    `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *18%*`,
-    `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *19%*`,
-    `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *20%*`,
-    `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *21%*`,
-    `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *22%*`,
-    `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *23%*`,
-    `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *24%*`,
-    `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *25%*`,
-    `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *26%*`,
-    `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *27%*`,
-    `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *28%*`,
-    `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *29%*`,
-    `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *30%*`,
-    `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *31%*`,
-    `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *32%*`,
-    `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *33%*`,
-    `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *34%*`,
-    `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *35%*`,
-    `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *36%*`,
-    `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *37%*`,
-    `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *38%*`,
-    `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *39%*`,
-    `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *40%*`,
-    `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *41%*`,
-    `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *42%*`,
-    `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *43%*`,
-    `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *44%*`,
-    `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *45%*`,
-    `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *46%*`,
-    `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *47%*`,
-    `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *48%*`,
-    `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *49%*`,
-    `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *50%*`,
-    `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *51%*`,
-    `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *52%*`,
-    `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *53%*`,
-    `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *54%*`,
-    `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *55%*`,
-    `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *56%*`,
-    `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *57%*`,
-    `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *58%*`,
-    `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *59%*`,
-    `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *60%*`,
-    `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *61%*`,
-    `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *62%*`,
-    `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *63%*`,
-    `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *64%*`,
-    `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *65%*`,
-    `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *66%*`,
-    `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *67%*`,
-    `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *68%*`,
-    `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *69%*`,
-    `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *70%*`,
-    `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *71%*`,
-    `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *72%*`,
-    `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *73%*`,
-    `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *74%*`,
-    `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *75%*`,
-    `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *76%*`,
-    `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *77%*`,
-    `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *78%*`,
-    `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *79%*`,
-    `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *80%*`,
-    `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *89%*`,
-    `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *90%*`,
-    `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *91%*`,
-    `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *92%*`,
-    `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *93%*`,
-    `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *94%*`,
-    `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *95%*`,
-    `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *96%*`,
-    `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *97%*`,
-    `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *98%*`,
-    `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *99%*`,
-    `❤Compatibilidad de relación entre: [${usuario}](tg://user?id=${msg.from.id}) + [${usersId}](tg://user?id=${msg.reply_to_message.from.id}) = *100%*`,
-  ];
-  var ma = Math.random();
-  var amorcompatibles = Math.floor(ma * compatibles.length);
-  bot.sendAnimation(chatid, animacion[amorani], {
-    caption: compatibles[amorcompatibles],
-    parse_mode: "Markdown",
-  });
-});
+
 //test
 async function getBanned() {
   try {
@@ -8026,26 +7483,6 @@ bot.onText(/^\/donar/, (msg) => {
   });
 });
 
-bot.onText(/^\/upimgur/, function (msg) {
-  var chatId = msg.chat.id;
-  if (msg.reply_to_message == undefined) {
-    return;
-  }
-  var photo = msg.reply_to_message.photo[1].file_id;
-  bot.getFileLink(photo).then(function (enlace) {
-    console.log(enlace);
-
-    imgur
-      .uploadUrl(enlace)
-      .then((json) => {
-        console.log(json.link);
-        bot.sendMessage(chatId, json.link);
-      })
-      .catch((err) => {
-        console.error(err.message);
-      });
-  });
-});
 
 bot.onText(/\/img (.+)/, function (msg, match) {
   try{
