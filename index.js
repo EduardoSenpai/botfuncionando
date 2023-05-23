@@ -8109,3 +8109,124 @@ bot.onText(/\/ping/, function onEditableText(msg) {
     });
 });
 
+
+
+bot.onText(/\/notificacion (on|off)/, (msg, match) => {
+  const chatId = msg.chat.id;
+  const chatType = msg.chat.type;
+  const command = match[1];
+
+  if (chatType === 'group' || chatType === 'supergroup') {
+    // Verificar si el remitente del mensaje es un administrador o el creador del grupo
+    bot.getChatAdministrators(chatId)
+      .then((administrators) => {
+        const isAdmin = administrators.some(admin => admin.user.id === msg.from.id);
+        const isCreator = msg.chat.owner && msg.from.id === msg.chat.owner.id;
+
+        if (isAdmin || isCreator) {
+          if (command === 'on') {
+            // Verificar si el grupo ya está registrado en la base de datos
+            db.collection('grupos').doc(chatId.toString()).get()
+              .then((doc) => {
+                if (doc.exists) {
+                  // El grupo ya está registrado
+                  bot.sendMessage(chatId, '_¡El grupo ya está registrado para recibir notificaciones!_', {parse_mode:"Markdown"});
+                } else {
+                  // Guardar la ID del grupo en la base de datos
+                  db.collection('grupos').doc(chatId.toString()).set({ chatId })
+                    .then(() => {
+                      bot.sendAnimation(
+                        msg.chat.id,
+                        "https://img1.picmix.com/output/stamp/normal/5/9/2/2/2062295_fcbed.gif",
+                        {
+                          caption:
+                            "🦈_¡Perfecto, NOTIFICACIONES HABILITADAS!, ¡Pronto recibiras todas mis actualizaciones y noticias!_",
+                          parse_mode: "Markdown",
+                        }
+                      );
+                    })
+                    .catch((error) => {
+                      console.error('Error al guardar la ID del grupo:', error);
+                      bot.sendMessage(chatId, '_¡Ocurrió un error al activar las notificaciones!_', {parse_mode: "Markdown"});
+                    });
+                }
+              })
+              .catch((error) => {
+                console.error('Error al verificar el grupo en la base de datos:', error);
+                bot.sendMessage(chatId, '_¡Ocurrió un error al verificar el grupo en la base de datos!_', {parse_mode: "Markdown"});
+              });
+          } else if (command === 'off') {
+            // Eliminar la ID del grupo de la base de datos
+            db.collection('grupos').doc(chatId.toString()).delete()
+              .then(() => {
+                bot.sendAnimation(
+                  msg.chat.id,
+                  "https://i.pinimg.com/originals/16/2e/fe/162efe70b89e4c9fb4e8e55ee559f351.gif",
+                  {
+                    caption:
+                      "🦈_¡Perfecto, NOTIFICACIONES DESHABILITADAS!, ¡Vuelve pronto si quieres recibir todas mis actualizaciones y noticias!_",
+                    parse_mode: "Markdown",
+                  }
+                );
+              })
+              .catch((error) => {
+                console.error('Error al eliminar la ID del grupo:', error);
+                bot.sendMessage(chatId, '¡Ocurrió un error al desactivar las notificaciones!');
+              });
+          }
+        } else {
+          bot.sendMessage(chatId, 'Solo los administradores y el creador del grupo pueden usar este comando:(');
+        }
+      })
+      .catch((error) => {
+        console.error('Error al obtener los administradores del grupo:', error);
+        bot.sendMessage(chatId, '¡Ocurrió un error al obtener los administradores del grupo!');
+      });
+  } else {
+    bot.sendMessage(chatId, 'Este comando solo se puede utilizar en grupos:(');
+  }
+});
+const usuariosPermitidos = ['1701653200', '1702852475'];
+// Comando /lanzar
+bot.onText(/\/anunciar/, (msg) => {
+  const chatId = msg.chat.id;
+  const userId = msg.from.id;
+
+  // Verificar si el usuario tiene permiso para usar el comando /lanzar
+  if (usuariosPermitidos.includes(userId.toString())) {
+    if (msg.reply_to_message) {
+      const message = msg.reply_to_message;
+
+      // Obtener todas las IDs de los grupos desde la base de datos
+      db.collection('grupos').get()
+        .then((querySnapshot) => {
+          const promises = [];
+
+          querySnapshot.forEach((doc) => {
+            const group = doc.data();
+            const groupId = group.chatId;
+
+            // Enviar el mensaje al grupo y agregar la promesa a un arreglo
+            promises.push(bot.copyMessage(groupId, chatId, message.message_id));
+          });
+
+          // Esperar a que se completen todas las promesas
+          Promise.all(promises)
+            .then(() => {
+              bot.sendMessage(msg.chat.id, "*🐋¡Mensaje enviado a los grupos!*", {parse_mode: "Markdown"})
+            })
+            .catch((error) => {
+              console.error('Error al enviar el mensaje a los grupos:', error);
+            });
+        })
+        .catch((error) => {
+          console.error('Error al obtener los grupos:', error);
+        });
+    } else {
+      bot.sendMessage(chatId, '*¡Por favor, responde a un mensaje al que deseas enviar a los grupos!*', {parse_mode: "Markdown"});
+    }
+  } else {
+    bot.sendMessage(chatId, 'No tienes permiso para usar este comando:(');
+  }
+});
+
