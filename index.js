@@ -31,6 +31,13 @@ var tcpp = require('tcp-ping');
 
 const google = require("googlethis");
 
+const {
+  GOOGLE_IMG_SCRAP,
+  GOOGLE_IMG_INVERSE_ENGINE_URL,
+  GOOGLE_IMG_INVERSE_ENGINE_UPLOAD,
+  GOOGLE_QUERY,
+} = require("google-img-scrap");
+
 var app = express();
 
 const port =  process.env.PORT || 4000;
@@ -7403,11 +7410,8 @@ bot.on("message", function (msg) {
   });
 });*/
 
-bot.onText(/^\.reverse|^\/reverse/, function (msg) {
+/* bot.onText(/^\.reverse|^\/reverse/, function (msg) {
   var chatid = msg.chat.id;
-  if (msg.reply_to_message == undefined) {
-    return;
-  }
       try {
         if (msg.reply_to_message.photo) {
           // Get the photo file_id
@@ -7417,16 +7421,17 @@ bot.onText(/^\.reverse|^\/reverse/, function (msg) {
             console.log("hecho " + path);
             async function start() { //C:\Users\Usuario PC\Documents\01 Gura\01 GURA\download\file_37.jpg
               try {
-                const my_awesome_image = fs.readFileSync(path);
-                const reverse = await google.search(my_awesome_image, { ris: true });
-                console.log(reverse.results)
-                bot.sendMessage(chatid, `<code>${reverse.results[0].title}</code>`, {
+            const imageBuffer = fs.readFileSync(path);
+            const test = await GOOGLE_IMG_INVERSE_ENGINE_UPLOAD(imageBuffer, {
+              limit: 5,
+            });
+                bot.sendMessage(chatid, `<code>${test.result[0].title}</code>`, { //${reverse.results[0].title}
                   reply_markup: {
                     inline_keyboard: [
                       [
                         {
                           text: "🔍Resultado de búsqueda→",
-                          url: reverse.results[0].url,
+                          url: test.result[0].url,
                           callback_data: "any",
                         },
                       ],
@@ -7448,7 +7453,59 @@ bot.onText(/^\.reverse|^\/reverse/, function (msg) {
         console.log(error);
         bot.sendMessage(chatid, "Parece que hubo un error:(");
       }
+}); */
+
+
+bot.onText(/\/reverse/, (msg) => {
+  const chatId = msg.chat.id;
+  // Verifica si el mensaje es una respuesta a otro mensaje
+  if (msg.reply_to_message) {
+    var chatid = msg.chat.id;
+    try {
+      if (msg.reply_to_message.photo) {
+        // Get the photo file_id
+        var photoId = msg.reply_to_message.photo[msg.reply_to_message.photo.length - 1].file_id;
+       bot.downloadFile(photoId, "./download").then(function (path) {
+          console.log("hecho " + path);
+          async function start() { //C:\Users\Usuario PC\Documents\01 Gura\01 GURA\download\file_37.jpg
+            try {
+          const imageBuffer = fs.readFileSync(path);
+          const test = await GOOGLE_IMG_INVERSE_ENGINE_UPLOAD(imageBuffer, {
+            limit: 5,
+          });
+              bot.sendMessage(chatid, `<code>${test.result[0].title}</code>`, { //${reverse.results[0].title}
+                reply_markup: {
+                  inline_keyboard: [
+                    [
+                      {
+                        text: "🔍Resultado de búsqueda→",
+                        url: test.result[0].url,
+                        callback_data: "any",
+                      },
+                    ],
+                  ],
+                },
+                parse_mode: "HTML",
+              });
+              fs.unlinkSync(path);
+              console.log("!borrado...")
+            } catch (error) {
+              console.log(error);
+              bot.sendMessage(chatid, "Parece que hubo un error en la búsqueda:(");
+            }
+           }
+           start();
+        });
+    }
+  } catch (error) {
+      console.log(error);
+      bot.sendMessage(chatid, "Parece que hubo un error:(");
+    }
+  } else {
+    bot.sendMessage(chatId, `<i>¡Por favor, responde a una imagen para usar este comando!</i>`, {parse_mode: "HTML"});
+  }
 });
+
 bot.onText(/\/quote/, (msg) => {
   const chatId = msg.chat.id;
   const frase = randomQuote();
@@ -7484,7 +7541,7 @@ bot.onText(/^\/donar/, (msg) => {
 });
 
 
-bot.onText(/\/img (.+)/, function (msg, match) {
+/* bot.onText(/\/img (.+)/, function (msg, match) {
   try{
     var d = match[1];
     gis(d, logResults);
@@ -7500,6 +7557,27 @@ bot.onText(/\/img (.+)/, function (msg, match) {
         console.log(e)
       }
     }
+  }catch(e){
+    console.log(e);
+  }
+}); */
+
+bot.onText(/\/img (.+)/, function (msg, match) {
+  var d = match[1];
+  try{
+    (async () => {
+      const test = await GOOGLE_IMG_SCRAP({
+        search: d,
+        limit: 5,
+      });
+      console.log(test);
+      try {
+        bot.sendPhoto(msg.chat.id, `${test.result[0].url}`);
+      } catch (error) {
+        console.log(error);
+        bot.sendMessage(msg.chat.id, "Parece que hubo un error en la búsqueda:(",);
+      }
+    })();
   }catch(e){
     console.log(e);
   }

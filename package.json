@@ -25,6 +25,7 @@
     "firebase-admin": "^11.5.0",
     "fotology-x": "^1.2.4",
     "g-i-s": "^2.1.6",
+    "google-img-scrap": "^1.1.1",
     "google-tts-api": "^2.0.2",
     "googlethis": "^1.7.1",
     "image-search": "^0.0.1",
