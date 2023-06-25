@@ -1336,7 +1336,7 @@ bot.onText(/^\/demoteadm/, function (msg) {
 
 
 /**************************************************MODOS SPAM**************************************************/
-bot.onText(/\/spam (.+)/, (msg, match) => {
+/* bot.onText(/\/spam (.+)/, (msg, match) => {
   const chatid = msg.chat.id;
   const usuario = msg.from.id;
   const modo = match[1];
@@ -1437,7 +1437,7 @@ bot.onText(/\/spam (.+)/, (msg, match) => {
       }
     });
   }
-});
+}); */
 /**************************************************COMANDO PING**************************************************/
 
 let inicio = new Date();
